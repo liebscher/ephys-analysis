@@ -173,6 +173,28 @@ def get_troughpeak(time,spike_shape):
     peak_i = spike_shape[trough_i:].argmax()+trough_i
     return time[trough_i],time[peak_i]
 
+def get_width_half_height(time,spike_shape):
+    '''
+    grabs the time between the zero crossings around trough after normalize to min height and offset by 0.5
+    
+    Parameters
+    ------
+    time : numpy array
+    spike_shape : numpy array %should be up-sampled to at least 100000 before calculating
+    
+    Returns
+    ------
+    width_half_height : float
+        time between crossings in seconds
+
+    '''
+
+    spike_shape /= -spike_shape.min()
+    spike_shape = spike_shape + 0.5
+    zero_crossings = np.where(np.diff(np.sign(spike_shape)))[0]
+    
+    return time[zero_crossings[1]] - time[zero_crossings[0]]
+
 def get_width(block_path,clu,new_fs=1000000.0):
     '''
     grabs the time of the trough and peak
