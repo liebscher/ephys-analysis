@@ -188,12 +188,33 @@ def get_width_half_height(time,spike_shape):
         time between crossings in seconds
 
     '''
-
+    width = np.nan;
+    
+    trough,peak = get_troughpeak(time,spike_shape)
+    ind = np.where(time == trough)
+    troughind = ind[0][0]
+    
     spike_shape /= -spike_shape.min()
     spike_shape = spike_shape + 0.5
     zero_crossings = np.where(np.diff(np.sign(spike_shape)))[0]
     
-    return time[zero_crossings[1]] - time[zero_crossings[0]]
+    i = zero_crossings < troughind
+    j = zero_crossings > troughind
+
+    if (True in i) & (True in j):
+        # zero crossings before trough
+        i = (np.where(i))
+        pre_ind = zero_crossings[max(i[0])]
+        
+        # zero crossings after trough
+        j = (np.where(j))
+        post_ind = zero_crossings[min(j[0])]
+        
+        width = time[post_ind] - time[pre_ind]
+
+    return width
+
+
 
 def get_width(block_path,clu,new_fs=1000000.0):
     '''
